@@ -3,7 +3,7 @@
 ## Apk file
 https://drive.google.com/file/d/0B6iyDPTEohVmUG54Y0taTElIaTA/view
 ## Main classes
-* MainActivity. Управляет взаимодействием фрагментов Photo
+* MainActivity. Управляет взаимодействием фрагментов PhotoDetailsFragment и PhotoListFragment
 * PhotoDetailsFragment.
 Фрагмент с детальным отображением одного фото
 * PhotoListFragment.

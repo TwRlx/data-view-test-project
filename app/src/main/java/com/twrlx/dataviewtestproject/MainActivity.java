@@ -9,7 +9,7 @@ import com.twrlx.dataviewtestproject.fragments.PhotosListFragment;
 import com.twrlx.dataviewtestproject.units.AlbumPhoto;
 
 public class MainActivity extends AppCompatActivity implements PhotosListFragment.PhotosListFragmentListener {
-//test
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

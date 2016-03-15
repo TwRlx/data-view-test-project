@@ -2,6 +2,7 @@
 Тестовый проект отбражающий список фотографий с сервиса http://jsonplaceholder.typicode.com/photos
 ## Apk file
 https://drive.google.com/file/d/0B6iyDPTEohVmZXlfZ1djZ2tpOUU/view
+Предыдущую версию нужно удалить (там был debug-apk, а сейчас release)
 ## Main classes
 * MainActivity. Управляет взаимодействием фрагментов PhotoDetailsFragment и PhotoListFragment
 * PhotoDetailsFragment.

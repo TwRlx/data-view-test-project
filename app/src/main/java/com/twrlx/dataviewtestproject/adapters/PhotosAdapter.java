@@ -10,6 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.twrlx.dataviewtestproject.R;
 import com.twrlx.dataviewtestproject.fragments.PhotosListFragment;
 import com.twrlx.dataviewtestproject.units.AlbumPhoto;
@@ -53,6 +54,8 @@ public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.PhotoViewH
         if (thumbnailUrl != null){
             Glide.with(context)
                     .load(thumbnailUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.drawable.placeholder_image)
                     .into(holder.vPhotoImageView);
         }else{
             Glide.clear(holder.vPhotoImageView);

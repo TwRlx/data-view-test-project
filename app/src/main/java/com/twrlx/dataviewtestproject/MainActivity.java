@@ -15,9 +15,11 @@ public class MainActivity extends AppCompatActivity implements PhotosListFragmen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        getFragmentManager().beginTransaction()
-                .replace(R.id.fragment_placeholder, new PhotosListFragment())
-                .commit();
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_placeholder, PhotosListFragment.newInstance())
+                    .commit();
+        }
     }
 
     @Override

@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.twrlx.dataviewtestproject.R;
 import com.twrlx.dataviewtestproject.units.AlbumPhoto;
 
@@ -59,6 +60,8 @@ public class PhotoDetailsFragment extends Fragment {
 
         Glide.with(getActivity())
                 .load(photo.getUrl())
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .placeholder(R.drawable.placeholder_image)
                 .into(photoImageView);
 
         return rootView;

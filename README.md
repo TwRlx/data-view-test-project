@@ -1,7 +1,7 @@
 # DataViewTestProject
 Тестовый проект отбражающий список фотографий с сервиса http://jsonplaceholder.typicode.com/photos
 ## Apk file
-https://drive.google.com/file/d/0B6iyDPTEohVmUG54Y0taTElIaTA/view
+https://drive.google.com/file/d/0B6iyDPTEohVmZXlfZ1djZ2tpOUU/view
 ## Main classes
 * MainActivity. Управляет взаимодействием фрагментов PhotoDetailsFragment и PhotoListFragment
 * PhotoDetailsFragment.

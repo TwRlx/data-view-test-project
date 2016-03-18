@@ -1,10 +1,16 @@
 # DataViewTestProject
 Тестовый проект отбражающий список фотографий с сервиса http://jsonplaceholder.typicode.com/photos
 ## Apk file
-https://drive.google.com/file/d/0B6iyDPTEohVmUG54Y0taTElIaTA/view
+https://drive.google.com/file/d/0B6iyDPTEohVmZXlfZ1djZ2tpOUU/view
+
+Предыдущую версию нужно удалить (там был debug-apk, а сейчас release)
 ## Main classes
-* MainActivity. Управляет взаимодействием фрагментов PhotoDetailsFragment и PhotoListFragment
+* MainActivity.
+
+*Управляет взаимодействием фрагментов PhotoDetailsFragment и PhotoListFragment*
 * PhotoDetailsFragment.
-Фрагмент с детальным отображением одного фото
+
+*Фрагмент с детальным отображением одного фото*
 * PhotoListFragment.
-Фрагмент c фотографиями пользователя в виде списка. При старте фрагмента делается запрос на получение фотографий (http://jsonplaceholder.typicode.com/photos). Если интернет соединение отсутствует, то отобразяться данные, которые были сохранены в кэше.  Для обновления списка фотографий нужно потянуть вниз список. 
+
+*Фрагмент c фотографиями пользователя в виде списка. При старте фрагмента делается запрос на получение фотографий (http://jsonplaceholder.typicode.com/photos). Если интернет соединение отсутствует, то отобразяться данные, которые были сохранены в кэше.  Для обновления списка фотографий нужно потянуть вниз список.*

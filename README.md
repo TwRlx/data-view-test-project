@@ -1,6 +1,6 @@
 # DataViewTestProject
 Тестовый проект отбражающий список фотографий с сервиса http://jsonplaceholder.typicode.com/photos
-Изначально загружается список альбомов. Затем загружаются фотографии из первого альбома и отображаются в RecyclerView фрагмента PhotosListFragment. При прокрутке вниз подгружаются фотографии из других альбомов. При обновлении список очищается и в него снова загружаются фотографии из первого альбома.
+Изначально загружается список альбомов http://jsonplaceholder.typicode.com/albums. Затем загружаются фотографии из первого альбома http://jsonplaceholder.typicode.com/albums/1/photos и отображаются в RecyclerView фрагмента PhotosListFragment. При прокрутке вниз подгружаются фотографии из других альбомов http://jsonplaceholder.typicode.com/albums/{id}/photos. При обновлении список очищается и в него снова загружаются фотографии из первого альбома.
 ## Apk file
 https://drive.google.com/file/d/0B6iyDPTEohVmZXlfZ1djZ2tpOUU/view
 

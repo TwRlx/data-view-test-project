@@ -12,12 +12,9 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.twrlx.dataviewtestproject.R;
-import com.twrlx.dataviewtestproject.fragments.PhotosListFragment;
 import com.twrlx.dataviewtestproject.units.AlbumPhoto;
 
 import java.util.ArrayList;
-
-import javax.inject.Inject;
 
 /**
  * Created by TwRlx on 12.03.2016.

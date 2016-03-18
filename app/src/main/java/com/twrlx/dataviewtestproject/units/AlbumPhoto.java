@@ -2,8 +2,6 @@ package com.twrlx.dataviewtestproject.units;
 
 import java.io.Serializable;
 
-import javax.inject.Inject;
-
 /**
  * Created by TwRlx on 12.03.2016.
  */

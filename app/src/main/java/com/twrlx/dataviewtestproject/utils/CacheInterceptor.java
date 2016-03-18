@@ -23,10 +23,10 @@ public class CacheInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        Request originalRequest = chain.request();
-        Request.Builder request = originalRequest.newBuilder();
-        if (originalRequest.header("fresh") != null) {
-            request.cacheControl(CacheControl.FORCE_NETWORK);
+        Request.Builder request = chain.request().newBuilder();
+
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            request.cacheControl(CacheControl.FORCE_CACHE);
         }
 
         Response response = chain.proceed(request.build());
@@ -35,15 +35,10 @@ public class CacheInterceptor implements Interceptor {
             return response.newBuilder()
                     .removeHeader("Pragma")
                     .removeHeader("Cache-Control")
-                    .header("Cache-Control", "public, max-age=2419200")
+                    .header("Cache-Control", "public, max-stale=2419200")
                     .build();
         } else {
-
-            return response.newBuilder()
-                    .removeHeader("Pragma")
-                    .removeHeader("Cache-Control")
-                    .header("Cache-Control", "public, only-if-cached, max-stale=2419200")
-                    .build();
+            return response;
         }
     }
 

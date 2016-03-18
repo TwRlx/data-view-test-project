@@ -1,12 +1,16 @@
 package com.twrlx.dataviewtestproject.di;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 
 import com.twrlx.dataviewtestproject.annotations.ClientCache;
 import com.twrlx.dataviewtestproject.utils.CacheInterceptor;
 
 import java.io.File;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -37,6 +41,12 @@ public class DataViewModule {
 
     @Singleton
     @Provides
+    Context provideContext() {
+        return context;
+    }
+
+    @Singleton
+    @Provides
     OkHttpClient provideCachedClient(@ClientCache File cacheDir, CacheInterceptor interceptor) {
         Cache cache = new Cache(cacheDir, 20 * 1024 * 1024);
         OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
@@ -62,6 +72,14 @@ public class DataViewModule {
         return new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(cachedClient);
+    }
+
+    @Singleton
+    @Provides
+    IntentFilter provideConnectivityIntentFilter(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        return filter;
     }
 
 }

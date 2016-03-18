@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/photo_item_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="12dp"
-    android:background="?attr/listChoiceBackgroundIndicator"
+    android:background="@drawable/item_background_selector"
     >
 
     <ImageView
         android:id="@+id/photo_thumbnail"
         android:layout_width="60dp"
-        android:layout_height="60dp" />
+        android:layout_height="60dp"
+        tools:src="@drawable/placeholder_image"/>
 
     <TextView
         android:id="@+id/photo_title"
@@ -18,5 +20,5 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/photo_thumbnail"
         android:layout_marginLeft="6dp"
-        android:text="Title text"/>
+        tools:text="Title text"/>
 </RelativeLayout>

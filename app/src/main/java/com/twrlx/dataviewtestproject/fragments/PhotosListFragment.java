@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,32 +16,37 @@ import android.view.ViewGroup;
 import com.twrlx.dataviewtestproject.DataViewApplication;
 import com.twrlx.dataviewtestproject.R;
 import com.twrlx.dataviewtestproject.adapters.PhotosAdapter;
-import com.twrlx.dataviewtestproject.requests.PhotosListRequest;
+import com.twrlx.dataviewtestproject.di.DaggerPhotosListComponent;
+import com.twrlx.dataviewtestproject.di.DataViewComponent;
+import com.twrlx.dataviewtestproject.di.PhotosListModule;
+import com.twrlx.dataviewtestproject.network.PhotosApi;
+import com.twrlx.dataviewtestproject.units.Album;
 import com.twrlx.dataviewtestproject.units.AlbumPhoto;
 import com.twrlx.dataviewtestproject.utils.NetworkUtils;
+import com.twrlx.dataviewtestproject.views.EndlessRecyclerOnScrollListener;
 
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 /**
  * Created by TwRlx on 12.03.2016.
  */
-public class PhotosListFragment extends Fragment implements PhotosAdapter.PhotoViewClicksListener, Callback<ArrayList<AlbumPhoto>>{
+public class PhotosListFragment extends Fragment implements PhotosAdapter.PhotoViewClicksListener{
 
     private static final String KEY_PHOTOS = "photos";
+    private static final String KEY_ALBUMS = "albums";
+    private static final String KEY_ALBUMS_LOADED_COUNT = "count";
 
-    private PhotosListFragmentListener photosListFragmentListener;
     private BroadcastReceiver receiver;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private PhotosAdapter photosAdapter;
-    private ArrayList<AlbumPhoto> photos;
+    private PhotosListFragmentListener photosListFragmentListener;
+    private int albumsLoadedCount = 0;
 
-    @Inject PhotosListRequest photosListRequest;
+    @Inject PhotosAdapter photosAdapter;
+    @Inject ArrayList<AlbumPhoto> photos;
+    @Inject ArrayList<Album> albums;
+    @Inject PhotosApi photosApi;
     @Inject IntentFilter connectionFilter;
 
     public PhotosListFragment() {
@@ -55,8 +59,18 @@ public class PhotosListFragment extends Fragment implements PhotosAdapter.PhotoV
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        DataViewComponent applicationComponent = ((DataViewApplication) getActivity().getApplicationContext())
+                .getApplicationComponent();
+        DaggerPhotosListComponent.builder()
+                .dataViewComponent(applicationComponent)
+                .photosListModule(new PhotosListModule(this))
+                .build().inject(this);
+
         if (savedInstanceState != null){
             photos = (ArrayList<AlbumPhoto>) savedInstanceState.getSerializable(KEY_PHOTOS);
+            albums = (ArrayList<Album>) savedInstanceState.getSerializable(KEY_ALBUMS);
+            albumsLoadedCount = savedInstanceState.getInt(KEY_ALBUMS_LOADED_COUNT);
         }
     }
 
@@ -64,46 +78,52 @@ public class PhotosListFragment extends Fragment implements PhotosAdapter.PhotoV
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putSerializable(KEY_PHOTOS, photos);
+        outState.putSerializable(KEY_ALBUMS, albums);
+        outState.putInt(KEY_ALBUMS_LOADED_COUNT, albumsLoadedCount);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_photos_list, container, false);
 
-        ((DataViewApplication) getActivity().getApplicationContext())
-                .getApplicationComponent().inject(this);
-
-        final Call<ArrayList<AlbumPhoto>> photosCall = photosListRequest.listPhotos();
         swipeRefreshLayout= (SwipeRefreshLayout) rootView.findViewById(R.id.photos_swipe_refresh);
 
-        if (photos == null) {
-            photos = new ArrayList<>();
+        if (albums == null || albums.size() == 0) {
             swipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
                     swipeRefreshLayout.setRefreshing(true);
+                    loadAlbums();
                 }
             });
-            photosCall.enqueue(this);
         }
 
         photosListFragmentListener = (PhotosListFragmentListener) getActivity();
-        photosAdapter = new PhotosAdapter(getActivity(), this, photos);
-
+        photosAdapter.setPhotos(photos);
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 photos.clear();
+                albumsLoadedCount = 0;
                 photosAdapter.notifyDataSetChanged();
-
-                Call<ArrayList<AlbumPhoto>> photosCall = photosListRequest.listPhotos();
-                photosCall.enqueue(PhotosListFragment.this);
+                if (albums == null || albums.size() == 0){
+                    loadAlbums();
+                }else{
+                    loadMoreAlbumPhotos();
+                }
             }
         });
 
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
         RecyclerView mRecyclerView = (RecyclerView) rootView.findViewById(R.id.photos_recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener(linearLayoutManager) {
+            @Override
+            public boolean onLoadMore(int currentPage) {
+                return loadMoreAlbumPhotos();
+            }
+        });
         mRecyclerView.setAdapter(photosAdapter);
 
         receiver = new BroadcastReceiver() {
@@ -114,6 +134,58 @@ public class PhotosListFragment extends Fragment implements PhotosAdapter.PhotoV
         };
 
         return rootView;
+    }
+
+    private void loadAlbums() {
+        photosApi.sendGetAlbumsRequest(new PhotosApi.ResponseHandler<ArrayList<Album>>() {
+            @Override
+            public void onResponse(ArrayList<Album> responseAlbums) {
+                if (responseAlbums != null && responseAlbums.size() > 0) {
+                    albums = responseAlbums;
+                    loadMoreAlbumPhotos();
+                }else{
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+            }
+
+            @Override
+            public void onFailure() {
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+    }
+
+    private boolean loadMoreAlbumPhotos() {
+        if (albums == null || albums.size() == 0){
+            return false;
+        }
+
+        if (albumsLoadedCount < albums.size()){
+            Album album = albums.get(albumsLoadedCount);
+            loadAlbumPhotos(album.getId());
+            return true;
+        }
+
+        return false;
+    }
+
+    private void loadAlbumPhotos(long albumId) {
+        photosApi.sendGetAlbumPhotosRequest(albumId, new PhotosApi.ResponseHandler<ArrayList<AlbumPhoto>>() {
+            @Override
+            public void onResponse(ArrayList<AlbumPhoto> responsePhotos) {
+                if (responsePhotos != null && albums.size() > 0) {
+                    photos.addAll(responsePhotos);
+                    photosAdapter.notifyDataSetChanged();
+                    albumsLoadedCount++;
+                }
+                swipeRefreshLayout.setRefreshing(false);
+            }
+
+            @Override
+            public void onFailure() {
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        } );
     }
 
     @Override
@@ -131,24 +203,6 @@ public class PhotosListFragment extends Fragment implements PhotosAdapter.PhotoV
     @Override
     public void onPhotoItemClick(AlbumPhoto photo) {
         photosListFragmentListener.navigateToPhotoDetailsFragment(photo);
-    }
-
-    @Override
-    public void onResponse(Call<ArrayList<AlbumPhoto>> call, Response<ArrayList<AlbumPhoto>> response) {
-
-        ArrayList<AlbumPhoto> responsePhotos = response.body();
-        if (responsePhotos != null) {
-            photos = responsePhotos;
-            photosAdapter.setPhotos(photos);
-            photosAdapter.notifyDataSetChanged();
-        }
-
-        swipeRefreshLayout.setRefreshing(false);
-    }
-
-    @Override
-    public void onFailure(Call<ArrayList<AlbumPhoto>> call, Throwable t) {
-        swipeRefreshLayout.setRefreshing(false);
     }
 
     public interface PhotosListFragmentListener {
